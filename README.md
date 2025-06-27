@@ -37,59 +37,105 @@ A playground for experimenting with Apache Iceberg using REST catalog, MinIO, an
    jupyter lab
    ```
 
+4. **Running Notebooks:**
 
+   **For Notebooks 1-3 (Local Environment):**
+   ```bash
+   # Ensure Docker is running first
+   docker compose up -d --build
+   
+   # Then start local Jupyter
+   uv sync
+   source .venv/bin/activate
+   jupyter lab
+   # Open notebooks 1-3 in the local Jupyter Lab
+   ```
 
+   **For Notebooks 4-9 (Spark Environment):**
+   ```bash
+   # Access Spark Jupyter Lab in browser
+   # http://localhost:8888
+   # Open notebooks 4-9 in the Docker Jupyter Lab
+   ```
 
-
-4. **Configuration Files:**
+5. **Configuration Files:**
    - `spark-defaults.conf` - Spark configuration for Docker setup
    - `pyproject.toml` - Python dependencies for local setup
    - `docker-compose.yml` - Infrastructure setup
 
 ## 📊 Notebooks
 
-### Core Tutorials
+### 🏠 Local Environment Notebooks (uv + PyIceberg)
+**Run these in your local Jupyter Lab after `uv sync` and environment activation:**
 
-#### `/notebooks/1-basic_operations.ipynb` - Getting Started
-- **Simplified Spark Configuration**: Uses `spark-defaults.conf` for clean notebook code
-- **Full Iceberg Integration**: Native connection to REST catalog
-- **Basic CRUD Operations**: Create, read, update, delete operations
-- **Table Management**: Schema definition and data insertion
+#### `/notebooks/1-create_user_table.ipynb` - Table Creation with PyIceberg
+- **Environment**: Local Python (uv venv) + PyIceberg
+- **Connection**: localhost endpoints to Docker services
+- **Focus**: Table creation, schema definition, namespace management
+- **Run with**: `jupyter lab` (local environment)
+
+#### `/notebooks/2-insert_with_polars.ipynb` - Data Insertion with Polars
+- **Environment**: Local Python (uv venv) + Polars + PyIceberg
+- **Connection**: localhost endpoints to Docker services  
+- **Focus**: Efficient data loading with Polars DataFrames
+- **Run with**: `jupyter lab` (local environment)
+
+#### `/notebooks/3-select_with_duckdb.ipynb` - Analytics with DuckDB
+- **Environment**: Local Python (uv venv) + DuckDB + PyIceberg
+- **Connection**: localhost endpoints to Docker services
+- **Focus**: High-performance analytics and SQL querying
+- **Run with**: `jupyter lab` (local environment)
+
+### 🐳 Spark Docker Environment Notebooks
+**Run these in the Spark Docker container at http://localhost:8888:**
+
+#### `/notebooks/4-select_with_spark.ipynb` - Spark SQL Querying
+- **Environment**: Spark Docker container with full cluster capabilities
+- **Connection**: Internal Docker network (iceberg-rest:8181, minio:9000)
+- **Focus**: Distributed SQL operations and DataFrame API
+- **Run with**: Docker Jupyter Lab at http://localhost:8888
+
+#### `/notebooks/5-upsert_with_spark.ipynb` - ACID Operations
+- **Environment**: Spark Docker container
+- **Focus**: Upsert operations, ACID transactions, conflict resolution
 
 #### `/notebooks/6-evolution_with_spark.ipynb` - Schema & Partition Evolution ✨
-- **Schema Evolution**: Add, rename, and modify columns without downtime
-- **Partition Evolution**: Optimize query performance with dynamic partitioning
-- **Backward Compatibility**: Handle mixed schema versions gracefully
-- **Best Practices**: Evolution monitoring and data quality validation
-- **Refactored Code**: Clean, modular functions with comprehensive error handling
-- **Setup**: Works with both Docker Spark and local uv environments
+- **Environment**: Spark Docker container
+- **Focus**: Schema evolution, partition evolution, backward compatibility
+- **Features**: Clean, modular functions with comprehensive error handling
 
-### Advanced Features
+#### `/notebooks/7-time_travel_and_rollback.ipynb` - Versioning & Time Travel
+- **Environment**: Spark Docker container
+- **Focus**: Historical data access, snapshot management
 
-#### `/notebooks/select_with_duckdb.ipynb` - Alternative Query Engine
-- **DuckDB + PyIceberg Hybrid**: Combines SQL processing with Iceberg I/O
-- **Handles Authentication Issues**: Works around DuckDB catalog limitations
-- **Performance Comparisons**: DuckDB vs Spark approaches
+#### `/notebooks/8-metadata_inspection.ipynb` - Table Metadata
+- **Environment**: Spark Docker container  
+- **Focus**: Table history, files, partitions analysis
 
-#### Additional Notebooks
-- **Time Travel & Versioning**: Explore historical data states
-- **Metadata Operations**: Table history, files, partitions analysis
-- **Performance Optimization**: Query tuning and file management
-
+#### `/notebooks/9-iceberg_architecture_layers.ipynb` - Advanced Architecture
+- **Environment**: Spark Docker container
+- **Focus**: Deep dive into Iceberg internals and optimization
 
 ## 🗂️ File Structure
 
 ```
 play-iceberg/
 ├── docker-compose.yml                    # Infrastructure setup
-├── spark-defaults.conf                   # Spark configuration
-├── pyproject.toml                        # Python dependencies
+├── spark-defaults.conf                   # Spark configuration (Docker)
+├── pyproject.toml                        # Python dependencies (local uv)
 ├── uv.lock                               # Dependency lock file
 ├── notebooks/
-│   ├── 1-basic_operations.ipynb          # Getting started tutorial
+│   # 🏠 Local Environment (uv + jupyter lab)
+│   ├── 1-create_user_table.ipynb         # PyIceberg table creation
+│   ├── 2-insert_with_polars.ipynb        # Polars data insertion
+│   ├── 3-select_with_duckdb.ipynb        # DuckDB analytics
+│   # 🐳 Spark Docker Environment (http://localhost:8888)
+│   ├── 4-select_with_spark.ipynb         # Spark SQL querying
+│   ├── 5-upsert_with_spark.ipynb         # ACID operations  
 │   ├── 6-evolution_with_spark.ipynb      # Schema & partition evolution
-│   ├── select_with_duckdb.ipynb          # DuckDB integration
-│   └── [additional notebooks...]         # More advanced topics
+│   ├── 7-time_travel_and_rollback.ipynb  # Versioning & time travel
+│   ├── 8-metadata_inspection.ipynb       # Table metadata analysis
+│   └── 9-iceberg_architecture_layers.ipynb # Advanced architecture
 └── README.md                             # This file
 ```
 
