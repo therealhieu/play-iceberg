@@ -21,7 +21,7 @@ services:
     volumes:
       - ./warehouse:/home/iceberg/warehouse
       - ./notebooks/:/home/iceberg/notebooks/
-      - ./spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
+      - ./infra/spark/spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
   iceberg-rest:
     image: apache/iceberg-rest-fixture
     container_name: iceberg-rest
@@ -53,6 +53,39 @@ services:
     command: ["server", "/data", "--console-address", ":9001"]
     volumes:
       - minio_data:/data
+  # Development Flink container with PyFlink and Jupyter
+  flink-dev:
+    build:
+      context: ./infra/flink
+      dockerfile: Dockerfile
+    container_name: flink-dev
+    ports:
+      - "8082:8081"   # Flink Web UI (keeping original port mapping)
+      - "8889:8888"   # Jupyter Lab (avoiding conflict with Spark)
+      - "6123:6123"   # JobManager RPC
+      - "6124:6124"   # Blob server
+    networks:
+      - iceberg_net
+    environment:
+      - AWS_ACCESS_KEY_ID=admin
+      - AWS_SECRET_ACCESS_KEY=password
+      - AWS_REGION=us-east-1
+      - FLINK_PROPERTIES=jobmanager.rpc.address:flink-dev
+    volumes:
+      - ./infra/flink/notebooks:/opt/workspace/notebooks
+      - ./infra/flink/examples:/opt/workspace/examples
+      - .:/opt/workspace/project  # Mount project root for development
+      - flink-dev-data:/opt/workspace/data
+    depends_on:
+      - minio
+      - iceberg-rest
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/overview"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
   mc:
     depends_on:
       - minio
@@ -77,6 +110,7 @@ volumes:
   minio_data:
   iceberg_data:
   jupyter_data:
+  flink-dev-data:
 
 networks:
   iceberg_net:

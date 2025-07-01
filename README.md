@@ -7,21 +7,28 @@ A playground for experimenting with Apache Iceberg using REST catalog, MinIO, an
 - **Apache Iceberg REST Catalog** - Catalog service for table metadata
 - **MinIO** - S3-compatible object storage for data files
 - **Spark** - Distributed query engine with Jupyter Lab
+- **Flink 1.20** - Stream processing engine with Iceberg integration
 - **PostgreSQL** - Optional backend for catalog metadata
 
 ## 🚀 Setup
 
-1. **Start the infrastructure:**
+1. **Setup infrastructure:**
+   ```bash
+   ./setup.sh
+   ```
+
+2. **Start the infrastructure:**
    ```bash
    docker compose up -d --build
    ```
 
-2. **Access the services:**
+3. **Access the services:**
    - Jupyter Lab (Spark): http://localhost:8888
+   - Flink Web UI: http://localhost:8082
    - MinIO Console: http://localhost:9001 (admin/password)
    - Spark UI: http://localhost:4040 (when running)
 
-3. **Set up local Python environment:**
+4. **Set up local Python environment:**
    ```bash
    # Install uv if not already installed
    curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -37,18 +44,21 @@ A playground for experimenting with Apache Iceberg using REST catalog, MinIO, an
    jupyter lab
    ```
 
-4. **Running Notebooks:**
+5. **Running Notebooks:**
 
-   **For Notebooks 1-3 (Local Environment):**
+   **For Notebooks 1-3, 10 (Local Environment):**
    ```bash
    # Ensure Docker is running first
    docker compose up -d --build
+   
+   # Download Flink dependencies (for notebook 10)
+   ./setup.sh
    
    # Then start local Jupyter
    uv sync
    source .venv/bin/activate
    jupyter lab
-   # Open notebooks 1-3 in the local Jupyter Lab
+   # Open notebooks 1-3, 10 in the local Jupyter Lab
    ```
 
    **For Notebooks 4-9 (Spark Environment):**
@@ -58,10 +68,13 @@ A playground for experimenting with Apache Iceberg using REST catalog, MinIO, an
    # Open notebooks 4-9 in the Docker Jupyter Lab
    ```
 
-5. **Configuration Files:**
-   - `spark-defaults.conf` - Spark configuration for Docker setup
+6. **Configuration Files:**
+   - `infra/spark/spark-defaults.conf` - Spark configuration for Docker setup
+   - `infra/flink/flink-conf.yaml` - Flink configuration for Docker setup
+   - `infra/flink/setup-flink-deps.sh` - Download Flink Iceberg dependencies
    - `pyproject.toml` - Python dependencies for local setup
    - `docker-compose.yml` - Infrastructure setup
+   - `setup.sh` - Main setup script
 
 ## 📊 Notebooks
 
@@ -84,6 +97,12 @@ A playground for experimenting with Apache Iceberg using REST catalog, MinIO, an
 - **Environment**: Local Python (uv venv) + DuckDB + PyIceberg
 - **Connection**: localhost endpoints to Docker services
 - **Focus**: High-performance analytics and SQL querying
+- **Run with**: `jupyter lab` (local environment)
+
+#### `/notebooks/10-flink_iceberg_streaming.ipynb` - Stream Processing with PyFlink
+- **Environment**: Local Python (uv venv) + PyFlink 1.20 + PyIceberg
+- **Connection**: localhost endpoints to Docker services
+- **Focus**: Stream processing and real-time analytics with Flink
 - **Run with**: `jupyter lab` (local environment)
 
 ### 🐳 Spark Docker Environment Notebooks
@@ -119,16 +138,26 @@ A playground for experimenting with Apache Iceberg using REST catalog, MinIO, an
 ## 🗂️ File Structure
 
 ```
-play-iceberg/
+play_iceberg/
 ├── docker-compose.yml                    # Infrastructure setup
-├── spark-defaults.conf                   # Spark configuration (Docker)
+├── setup.sh                              # Main setup script
 ├── pyproject.toml                        # Python dependencies (local uv)
 ├── uv.lock                               # Dependency lock file
+├── infra/                                # Infrastructure configuration
+│   ├── spark/
+│   │   └── spark-defaults.conf           # Spark configuration (Docker)
+│   └── flink/
+│       ├── flink-conf.yaml               # Flink configuration (Docker)
+│       ├── flink-iceberg-example.sql     # Flink SQL example
+│       ├── setup-flink-deps.sh           # Download Flink dependencies
+│       ├── test-flink-setup.sh           # Test Flink setup
+│       └── flink-lib/                    # Flink JAR dependencies
 ├── notebooks/
 │   # 🏠 Local Environment (uv + jupyter lab)
 │   ├── 1-create_user_table.ipynb         # PyIceberg table creation
 │   ├── 2-insert_with_polars.ipynb        # Polars data insertion
 │   ├── 3-select_with_duckdb.ipynb        # DuckDB analytics
+│   ├── 10-flink_iceberg_streaming.ipynb  # PyFlink stream processing
 │   # 🐳 Spark Docker Environment (http://localhost:8888)
 │   ├── 4-select_with_spark.ipynb         # Spark SQL querying
 │   ├── 5-upsert_with_spark.ipynb         # ACID operations  
@@ -145,6 +174,7 @@ play-iceberg/
 - **MinIO S3 API**: http://localhost:9000
 - **MinIO Console**: http://localhost:9001
 - **Jupyter Lab**: http://localhost:8888
+- **Flink Web UI**: http://localhost:8082
 - **Spark UI**: http://localhost:4040
 
 ## 🔒 Default Credentials
