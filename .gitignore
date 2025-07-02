@@ -195,3 +195,4 @@ cython_debug/
 notebooks/metastore_db
 .claude
 .cline
+**/jars/
